@@ -1,0 +1,4 @@
+# Copy to config/device-sync.conf on the Mac before installation.
+# Do not quote values and do not commit the real token.
+BOARD_URL=https://your-dashboard.base44.app/functions/remarkableBoard
+BOARD_TOKEN=replace-with-a-long-random-device-read-token

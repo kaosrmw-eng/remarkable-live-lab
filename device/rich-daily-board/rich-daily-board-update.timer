@@ -1,0 +1,12 @@
+[Unit]
+Description=Periodically refresh the Rich Daily Board
+
+[Timer]
+OnBootSec=90s
+OnUnitActiveSec=5min
+AccuracySec=30s
+Persistent=true
+Unit=rich-daily-board-update.service
+
+[Install]
+WantedBy=timers.target

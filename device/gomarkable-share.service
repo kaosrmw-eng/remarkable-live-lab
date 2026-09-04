@@ -1,0 +1,14 @@
+[Unit]
+Description=reMarkable private controls and public viewer (capture defaults OFF)
+After=network.target xochitl.service
+
+[Service]
+WorkingDirectory=/home/root/gomarkable-move-test
+EnvironmentFile=/home/root/gomarkable-move-test/gomarkable-private.env
+Environment=RK_PUBLIC_VIEWER=true
+ExecStart=/home/root/gomarkable-move-test/gomarkablestream-share
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

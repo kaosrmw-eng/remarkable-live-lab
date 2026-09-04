@@ -1,0 +1,11 @@
+[Unit]
+Description=Refresh the Rich Daily Board from Base44
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/home/root/.local/share/remarkable-customizations/daily-board/update-board.sh
+
+[Install]
+WantedBy=multi-user.target

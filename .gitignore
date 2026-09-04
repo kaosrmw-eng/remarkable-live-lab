@@ -1,0 +1,12 @@
+.env
+*.env
+!*.env.example
+device-sync.conf
+*.pem
+*.key
+.device-keys/
+secrets/
+tailscale/
+dist/
+*.raw
+.DS_Store
