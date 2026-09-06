@@ -38,6 +38,7 @@ func setMuxer(eventPublisher *pubsub.PubSub, tm *TailscaleManager, restartCh cha
 	mux.HandleFunc("/sharing", sharingControl)
 	mux.HandleFunc("/control", controlPage)
 	mux.HandleFunc("/service-power", powerDownHandler(sharing, serviceShutdown))
+	mux.HandleFunc("/password", passwordChangeHandler(ownerCredentials, jwtMgr))
 
 	// Custom handler to serve index.html for root path
 	mux.HandleFunc("/", newIndexHandler(stripFS{http.FS(assetsFS)}, jwtMgr != nil))

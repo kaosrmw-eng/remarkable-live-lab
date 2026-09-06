@@ -27,14 +27,15 @@ import (
 )
 
 type configuration struct {
-	PublicViewer   bool    `envconfig:"PUBLIC_VIEWER" default:"false"`
-	BindAddr       string  `envconfig:"SERVER_BIND_ADDR" default:":2001" required:"true" description:"The server bind address"`
-	Username       string  `envconfig:"SERVER_USERNAME" default:"admin"`
-	Password       string  `envconfig:"SERVER_PASSWORD" default:"password"`
-	TLS            bool    `envconfig:"HTTPS" default:"true"`
-	DevMode        bool    `envconfig:"DEV_MODE" default:"false"`
-	DeltaThreshold float64 `envconfig:"DELTA_THRESHOLD" default:"0.30" description:"Change ratio threshold (0.0-1.0) above which full frame is sent"`
-	Debug          bool    `envconfig:"DEBUG" default:"false" description:"Enable debug logging"`
+	PublicViewer    bool    `envconfig:"PUBLIC_VIEWER" default:"false"`
+	PublicViewerURL string  `envconfig:"PUBLIC_VIEWER_URL" default:"" description:"Canonical public viewer URL shown by owner controls"`
+	BindAddr        string  `envconfig:"SERVER_BIND_ADDR" default:":2001" required:"true" description:"The server bind address"`
+	Username        string  `envconfig:"SERVER_USERNAME" default:"admin"`
+	Password        string  `envconfig:"SERVER_PASSWORD" default:"password"`
+	TLS             bool    `envconfig:"HTTPS" default:"true"`
+	DevMode         bool    `envconfig:"DEV_MODE" default:"false"`
+	DeltaThreshold  float64 `envconfig:"DELTA_THRESHOLD" default:"0.30" description:"Change ratio threshold (0.0-1.0) above which full frame is sent"`
+	Debug           bool    `envconfig:"DEBUG" default:"false" description:"Enable debug logging"`
 
 	// TLS certificate configuration
 	TLSCertFile     string `envconfig:"TLS_CERT_FILE" default:"" description:"Path to custom TLS certificate file"`
@@ -82,6 +83,9 @@ var (
 	c configuration
 	// JWT manager for token authentication
 	jwtMgr *jwtutil.Manager
+	// Runtime owner credential store. A persisted bcrypt hash overrides the
+	// bootstrap password supplied by the environment file.
+	ownerCredentials *ownerCredentialStore
 	// Temporary credentials for Funnel access
 	funnelCreds *FunnelCredentials
 
@@ -165,6 +169,10 @@ func main() {
 			log.Printf("Warning: JWT initialization failed: %v (falling back to Basic Auth only)", err)
 			jwtMgr = nil
 		}
+	}
+	ownerCredentials, err = newOwnerCredentialStore(c.JWTSecretDir, c.Password)
+	if err != nil {
+		log.Fatalf("Owner credentials unavailable: %v", err)
 	}
 
 	// Initialize temporary credentials manager for Funnel
@@ -297,6 +305,13 @@ func main() {
 					} else {
 						go publicServer.Serve(publicListener)
 					}
+				}
+				privateMobileListener, err := tm.PrivateControlListener()
+				if err != nil {
+					log.Printf("Private mobile controls unavailable: %v", err)
+				} else {
+					log.Printf("Private mobile controls ready on tailnet port 2003")
+					go server.Serve(privateMobileListener)
 				}
 				l := tm.GetListener()
 				if l == nil {

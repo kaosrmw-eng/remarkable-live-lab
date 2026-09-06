@@ -4,7 +4,10 @@ import (
 	"encoding/json"
 	"github.com/owulveryck/goMarkableStream/internal/pubsub"
 	"github.com/owulveryck/goMarkableStream/internal/stream"
+	"html"
+	"net"
 	"net/http"
+	"strings"
 )
 
 // Separate read-only server: never forward to the private mux.
@@ -56,5 +59,13 @@ func controlPage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Unavailable", 500)
 		return
 	}
-	w.Write(b)
+	viewerURL := c.PublicViewerURL
+	host := r.Host
+	if splitHost, _, err := net.SplitHostPort(r.Host); err == nil {
+		host = splitHost
+	}
+	if viewerURL == "" && net.ParseIP(strings.Trim(host, "[]")) == nil {
+		viewerURL = "https://" + host + ":8443/"
+	}
+	w.Write([]byte(strings.ReplaceAll(string(b), "__PUBLIC_VIEWER_URL__", html.EscapeString(viewerURL))))
 }

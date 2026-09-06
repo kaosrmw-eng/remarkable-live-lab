@@ -79,7 +79,10 @@ func AuthMiddleware(next http.Handler, jwtMgr *jwtutil.Manager) http.Handler {
 // Checks both main credentials and temporary funnel credentials if active.
 func checkCredentials(username, password string) bool {
 	// Check main credentials first
-	if username == c.Username && password == c.Password {
+	if username == c.Username && ownerCredentials != nil && ownerCredentials.validate(password) {
+		return true
+	}
+	if username == c.Username && ownerCredentials == nil && password == c.Password {
 		return true
 	}
 	// Check temporary funnel credentials if active

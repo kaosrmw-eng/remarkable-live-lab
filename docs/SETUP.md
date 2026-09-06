@@ -8,14 +8,18 @@ writable `/home` → sleep-screen display on the next transition.
 Live sharing: tablet display process → bounded read-only capture → shared
 delta/compression encoder → Tailscale Funnel → browser pixel renderer.
 
-Owner: tailnet-connected browser → private HTTPS `/control` → login → start,
+Owner: tailnet-connected browser → private control listener → login → start,
 stop, rotation, timer, copy link, or service shutdown.
 
 Private endpoint: `https://<device>.<tailnet>.ts.net/control` (443).
+Phone-safe fallback: `http://<device-tailscale-100.x-ip>:2003/control`.
 Public endpoint: `https://<device>.<tailnet>.ts.net:8443/`.
 The same hostname resolves differently on private tailnet DNS versus public DNS.
 Phone browser DNS/proxy settings can matter; a green device indicator does not
-prove that a browser is using the private route. Do not bypass TLS warnings.
+prove that a browser is using the private route. The numeric port-2003 fallback
+avoids that ambiguity and is bound through tsnet, not Wi-Fi or Funnel. HTTP is
+intentional for that tailnet-only route because WireGuard encrypts transport;
+application login is still required. Do not bypass TLS warnings on the hostname.
 
 ## Requirements
 
@@ -39,6 +43,8 @@ prove that a browser is using the private route. Do not bypass TLS warnings.
    unique credentials/hostname, and chmod 0600. Never put this filled file in Git.
 5. Test the binary interactively and enroll its device using the Tailscale login
    flow. Confirm private login and public read-only boundaries before sharing.
+   After login, the Security panel can replace the bootstrap password. The new
+   credential is stored as a mode-0600 bcrypt hash and invalidates all sessions.
 6. Only then consider the supplied installer. It briefly remounts `/` writable
    to add one systemd unit and a boot link under `/lib`, and restores read-only.
    `/etc` is volatile on the tested firmware, so ordinary enabling there is not

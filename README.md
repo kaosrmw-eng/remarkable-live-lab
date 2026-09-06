@@ -25,7 +25,8 @@ It is not a full backup or a turnkey clone of Rich's cloud dashboard.
 
 ## Current streaming capabilities
 
-- Control page over private Tailscale HTTPS plus login.
+- Control page over private Tailscale HTTPS plus login, with a tailnet-only
+  numeric HTTP fallback on port 2003 for mobile DNS/TLS routing conflicts.
 - Separate public Funnel listener: read-only viewer, fullscreen and screenshots.
 - Copy the direct public viewer URL from the owner panel.
 - Sharing timer: 5–60 minutes, or until stopped/asleep.
@@ -36,6 +37,8 @@ It is not a full backup or a turnkey clone of Rich's cloud dashboard.
   detection stop existing sharing. Owner can explicitly start again.
 - Separate service shutdown, with confirmation; a full tablet restart brings back
   the installed service, not active capture.
+- Authenticated owner password replacement stores a protected bcrypt hash and
+  invalidates all existing browser sessions.
 - Control/network startup independent of framebuffer discovery. Start sharing
   performs bounded discovery and can report failure without crashing networking.
 
